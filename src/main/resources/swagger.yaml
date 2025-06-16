@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: Cloud Storage API
+  version: 1.0.0
+  description: REST API для облачного хранилища файлов
+
+servers:
+  - url: http://localhost:9090
+
+paths:
+  /login:
+    post:
+      summary: Авторизация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth-token:
+                    type: string
+
+  /logout:
+    post:
+      summary: Выход из приложения
+      responses:
+        '200':
+          description: Успешный выход
+
+  /list:
+    get:
+      summary: Получить список файлов пользователя
+      parameters: []
+      responses:
+        '200':
+          description: Список файлов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileResponse'
+
+  /file:
+    post:
+      summary: Загрузить файл
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Файл загружен
+
+    delete:
+      summary: Удалить файл
+      parameters:
+        - name: filename
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Файл удалён
+
+components:
+  schemas:
+    FileResponse:
+      type: object
+      properties:
+        filename:
+          type: string
+        size:
+          type: integer
