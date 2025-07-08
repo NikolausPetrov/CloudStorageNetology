@@ -1,0 +1,38 @@
+package ru.netology.services;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import ru.netology.model.SecurityUser;
+import ru.netology.repositories.UserRepository;
+
+@Service
+public class UserDetailsServiceImpl implements UserDetailsService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
+    
+    private final UserRepository userRepository;
+
+    public UserDetailsServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        logger.debug("Загрузка пользователя по имени: {}", username);
+        
+        return userRepository
+                .findByUsername(username)
+                .map(user -> {
+                    logger.debug("Пользователь {} найден", username);
+                    return new SecurityUser(user);
+                })
+                .orElseThrow(() -> {
+                    logger.warn("Пользователь {} не найден", username);
+                    return new UsernameNotFoundException("Username '" + username + "' not found");
+                });
+    }
+}
